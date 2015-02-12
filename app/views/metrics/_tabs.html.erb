@@ -4,6 +4,10 @@
   <li><%= link_to t(:"cmi.label_metrics"), metrics_path(:action => :show),
                   :class => selected_tab_class('metrics') %></li>
 <%- end -%>
+<%- if User.current.allowed_to?({:controller => :metrics, :action => :yearly}, @project) -%>
+  <li><%= link_to t(:"cmi.label_yearly"), metrics_path(:action => :yearly),
+                  :class => selected_tab_class('yearly') %></li>
+<%- end -%>
 <%- if User.current.allowed_to?({:controller => :metrics, :action => :info}, @project) -%>
   <li><%= link_to t(:"cmi.label_info"), metrics_path(:action => :info),
                   :class => selected_tab_class('info') %></li>

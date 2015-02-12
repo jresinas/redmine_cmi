@@ -20,6 +20,27 @@ module MetricsHelper
     pie_graph(percent, labels)
   end
 
+  def effort_done_year_graph(report, roles, year)
+    total = report.effort_done_year(year)
+    percent = roles.collect { |role| total.zero? ? 0.0 : (report.effort_done_by_role_year(role, year) * 100 / total).round(2) }
+    labels = roles.enum_for(:each_with_index).collect{ |role, index| "#{role}: #{percent[index]}%" }
+    pie_graph(percent, labels)
+  end
+
+  def effort_scheduled_year_graph(report, roles, year)
+    total = report.effort_scheduled_year(year)
+    percent = roles.collect { |role| total.zero? ? 0.0 : (report.effort_scheduled_by_role_year(role,year) * 100.0 / total).round(2) }
+    labels = roles.enum_for(:each_with_index).collect{ |role, index| "#{role}: #{percent[index]}%" }
+    pie_graph(percent, labels)
+  end
+
+  def effort_remaining_year_graph(report, roles, year)
+    total = report.effort_remaining_year(year)
+    percent = roles.collect { |role| total.zero? ? 0.0 : (report.effort_remaining_by_role_year(role,year) * 100 / total).round(2) }
+    labels = roles.enum_for(:each_with_index).collect{ |role, index| "#{role}: #{percent[index]}%" }
+    pie_graph(percent, labels)
+  end
+
   private
 
   def pie_graph(data, labels, opts = {})

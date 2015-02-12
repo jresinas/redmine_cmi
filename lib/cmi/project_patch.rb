@@ -38,6 +38,17 @@ module CMI
                       :conditions => cond)
       end
 
+      def effort_done_by_role_yearly(role, from_date, to_date)
+        cond = [ project_condition(Setting.display_subprojects_issues?) <<
+                 ' AND (role = ?)' <<
+                 ' AND (spent_on >= ?)' <<
+                 ' AND (spent_on <= ?)',
+                 role, from_date, to_date ]
+        TimeEntry.sum(:hours,
+                      :include => [:project],
+                      :conditions => cond)
+      end
+
       def first_checkpoint
         cmi_checkpoints.find(:first,
                              :order => 'checkpoint_date ASC')
@@ -53,6 +64,14 @@ module CMI
         end
 
         base_line
+      end
+
+      def start_date
+        cmi_project_info.actual_start_date.to_time
+      end
+
+      def finish_date
+        cmi_checkpoints.last.scheduled_finish_date.to_time
       end
     end
   end

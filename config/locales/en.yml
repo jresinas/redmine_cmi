@@ -20,6 +20,7 @@ en:
 
   permission_cmi_management: View general management panel
   permission_cmi_view_metrics: View project metrics
+  permission_cmi_view_yearly: View project annual profit
   permission_cmi_project_info: Setup metrics basic info
   permission_cmi_add_checkpoints: Add checkpoints
   permission_cmi_edit_checkpoints: Edit checkpoints
@@ -31,6 +32,7 @@ en:
 
   cmi:
     label_metrics: Metrics
+    label_yearly: Annual return
     label_info: Basic info
     label_checkpoints: Checkpoints
     label_new_checkpoint: New checkpoint
@@ -149,6 +151,11 @@ en:
     label_bill_paid_statuses: Status for paid bill
     label_providers_paid_statuses: Status for paid provider
     label_add_user_profile: Add new user profile
+    label_pal: "P&L"
+    label_profit: Profit
+    label_staff_cost: Staff Cost
+    label_providers_cost: Providers Cost
+    label_cm: CM
 
     cmi_module_not_enabled: The module 'Metrics' is not enabled
     cmi_expense_tracker_not_available: There is not 'expense' tracker available

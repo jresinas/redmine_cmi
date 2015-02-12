@@ -1,0 +1,31 @@
+<tr>
+  <th rowspan="<%= 1 + @roles.length %>"><%= l('cmi.label_remaining') %></th>
+
+  <% @roles.each do |role| %>
+    <td><%=h role %></td>
+    <% @metrics.each_with_index do |metric, i| -%>
+      <%= content_tag :td, :id => "effort_remaining_#{role}_#{i}", :class => "issue" do -%>
+        <% if metric.checkpoint.new_record? %>
+          <%= hours metric.effort_remaining_by_role_year(role,metric.year) %>
+        <% else %>
+          <%= hours metric.effort_remaining_by_role(role) %>
+        <% end %>
+      <% end -%>
+    <% end -%>
+    </tr>
+    <tr>
+  <% end %>
+
+  <td><%= l(:label_total) %></td>
+  <% @metrics.each_with_index do |metric, i| %>
+    <%= content_tag :td, :id => "effort_remaining_total_#{i}", :class => "issue" do -%>
+      <% if metric.checkpoint.new_record? %>
+        <%= hours metric.effort_remaining_year(metric.year) %>
+        <%= effort_remaining_year_graph(metric, @roles, metric.year).html_safe %>
+      <% else %>
+        <%= hours metric.effort_remaining %>
+        <%= effort_remaining_graph(metric, @roles).html_safe %>
+      <% end %>
+    <% end -%>
+  <% end -%>
+</tr>

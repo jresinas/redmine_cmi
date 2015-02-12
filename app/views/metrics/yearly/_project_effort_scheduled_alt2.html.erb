@@ -1,0 +1,27 @@
+<tr>
+  <th rowspan="<%= 1 + @roles.length %>"><%= l('cmi.label_planned') %></th>
+
+  <% @roles.each do |role| %>
+    <% 
+    day_scheduled = (@metrics.last.effort_scheduled_by_role(role)/@total_days).to_f
+    scheduled = 0
+    %>
+    <td><%=h role %></td>
+    <% @days.each do |day, i| -%>
+      <% scheduled += (day*day_scheduled).round(1) %>
+      <%= content_tag :td, :id => "effort_planned_#{role}_#{i}", :class => "issue" do -%>
+        <%= hours (begin scheduled rescue '--' end) %>
+      <% end -%>
+    <% end -%>
+    </tr>
+    <tr>
+  <% end %>
+
+  <td><%= l(:label_total) %></td>
+  <% @metrics.drop(1).each_with_index do |metric, i| -%>
+    <%= content_tag :td, :id => "effort_planned_total_#{i}", :class => "issue" do -%>
+      <%= hours (begin (metric.effort_scheduled - @metrics[i].effort_scheduled) rescue '--' end) %>
+      <%= effort_scheduled_graph(metric, @roles).html_safe %>
+    <% end -%>
+  <% end -%>
+</tr>

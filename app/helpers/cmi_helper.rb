@@ -117,6 +117,8 @@ module CmiHelper
     'selected' if case tab
                   when 'metrics'
                     params[:controller] == 'metrics' and params[:action] == 'show'
+                  when 'yearly'
+                    params[:controller] == 'metrics' and params[:action] == 'yearly'
                   when 'info'
                     params[:controller] == 'metrics' and params[:action] == 'info'
                   when 'checkpoints'

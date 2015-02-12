@@ -27,6 +27,33 @@ class MetricsController < ApplicationController
     end
   end
 
+  def yearly
+    finish_date = @project.finish_date
+    start_date = @project.start_date 
+
+    @years = (start_date.year..finish_date.year).to_a
+
+    @checkpoints = []
+    @years.each do |year|
+      checkpoint = CmiCheckpoint.new
+      checkpoint[:project_id] = @project.id
+      checkpoint[:checkpoint_date] = ("01/01/"+year.to_s).to_time
+    
+
+      @checkpoints << checkpoint
+    end
+
+    @metrics = @checkpoints.collect { |checkpoint| CMI::CheckpointMetrics.new checkpoint }
+    # Métrica para la columna 'Total'
+    @metrics << CMI::ProjectMetrics.new(@project)
+
+    
+    respond_to do |format|
+        format.html { render :layout => !request.xhr? }
+        format.js { render(:update) {|page| page.replace_html "tab-content-metrics", :partial => 'metrics/show_yearly'} }
+    end
+  end
+
   def info
     @cmi_project_info = CmiProjectInfo.find_by_project_id @project.id
     unless @cmi_project_info

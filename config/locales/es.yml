@@ -20,6 +20,7 @@ es:
 
   permission_cmi_management: Ver cuadro de mando general
   permission_cmi_view_metrics: Ver métricas del proyecto
+  permission_cmi_view_yearly: Ver rentabilidad anual del proyecto
   permission_cmi_project_info: Configurar información base para métricas
   permission_cmi_add_checkpoints: Añadir puntos de control
   permission_cmi_edit_checkpoints: Editar puntos de control
@@ -31,6 +32,7 @@ es:
 
   cmi:
     label_metrics: Métricas
+    label_yearly: Anual
     label_info: Información base
     label_checkpoints: Puntos de control
     label_new_checkpoint: Nuevo punto de control
@@ -150,6 +152,11 @@ es:
     label_bill_paid_statuses: Estados de factura pagada
     label_providers_paid_statuses: Estados de proveedor pagado
     label_add_user_profile: Añadir nuevo perfil
+    label_pal: GyP
+    label_profit: Ingresos
+    label_staff_cost: G. Personal
+    label_providers_cost: G. Proveedores
+    label_cm: MC
 
     cmi_module_not_enabled: No está habilitado el módulo 'Métricas'
     cmi_expense_tracker_not_available: No existe el tracker gastos

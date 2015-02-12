@@ -7,7 +7,7 @@
 
 <div style="overflow:auto">
   <div>
-    <h3><%= l('cmi.label_income') %> <%= currency @project.cmi_project_info.total_income %></h3>
+    <h3><%= l('field_scheduled_finish_date') %>: <%= @project.finish_date.strftime("%d/%m/%Y") %></h3>
   </div>
   <table class="list issues" border="1">
     <thead>
@@ -27,6 +27,7 @@
       <%= render :partial => 'metrics/metrics/project_cost' %>
       <%= render :partial => 'metrics/metrics/project_advance' %>
       <%= render :partial => 'metrics/metrics/project_profitability' %>
+      <%= render :partial => 'metrics/metrics/project_income' %>
       <%= render :partial => 'metrics/metrics/project_cashflow' %>
       <%= render :partial => 'metrics/metrics/project_deviation' %>
 

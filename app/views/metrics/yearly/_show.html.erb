@@ -1,0 +1,30 @@
+<% unless flash[:error] %>
+
+<div style="overflow:auto">
+  <div>
+    <h3><%= l('field_scheduled_finish_date') %>: <%= @project.finish_date.strftime("%d/%m/%Y") %></h3>
+  </div>
+  <table class="list issues" border="1">
+    <thead>
+      <tr>
+        <th width="150"><%=l(:label_environment)%></th>
+        <th colspan="2" width="150"><%=l('cmi.label_metric')%></th>
+        <% @years.each do |year| %>
+          <th colspan="1"><%= year %></th>
+        <% end %>
+        <th colspan="1"><%= l(:label_total) %></th>
+      </tr>
+    </thead>
+    <tbody>
+      <%= render :partial => 'metrics/yearly/project_effort_done' %>
+      <%= render :partial => 'metrics/yearly/project_effort_remaining' %>
+      <%= render :partial => 'metrics/yearly/project_effort_scheduled' %>
+      <%= render :partial => 'metrics/yearly/project_cost' %>
+      <%#= render :partial => 'metrics/yearly/project_profitability' %>
+      <%#= render :partial => 'metrics/yearly/project_income' %>
+      <%= render :partial => 'metrics/yearly/project_pal' %>
+    </tbody>
+  </table>
+</div>
+
+<% end %>
