@@ -53,8 +53,6 @@ es:
     label_stages_cmi: Ciclo de vida
     label_archived: Archivados
 
-    label_income: 'Ingresos: '
-
     label_area: Área de proceso
     label_metric: Métrica
     label_project_management: Gestión de proyectos
@@ -152,7 +150,7 @@ es:
     label_bill_paid_statuses: Estados de factura pagada
     label_providers_paid_statuses: Estados de proveedor pagado
     label_add_user_profile: Añadir nuevo perfil
-    label_pal: GyP
+    label_pal: PyG
     label_profit: Ingresos
     label_staff_cost: G. Personal
     label_providers_cost: G. Proveedores

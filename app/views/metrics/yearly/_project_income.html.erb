@@ -1,8 +1,0 @@
-<tr>
-  <th rowspan="1" colspan="3"><%= l('cmi.label_income') %></th>
-  <% @metrics.each_with_index do |metric, i| -%>
-    <%= content_tag :td, :id => "income_#{i}", :class => "issue" do -%>
-      <%= currency @project.cmi_project_info.total_income_year(metric.year) %>
-    <% end -%>
-  <% end -%>
-</tr>
