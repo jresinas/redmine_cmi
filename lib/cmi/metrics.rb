@@ -293,11 +293,14 @@ module CMI
     end
 
     def original_margin_percent
+      mc = original_margin
       ti = project.cmi_project_info.total_income
-      if ti!=0
+      if mc == 0
+        0.0
+      elsif ti!=0
         100.0 * original_margin / project.cmi_project_info.total_income
       else
-        0.0
+        "< 0.0"
       end
     end
 
@@ -306,11 +309,14 @@ module CMI
     end
 
     def scheduled_margin_percent
+      mc = scheduled_margin
       ti = project.cmi_project_info.total_income
-      if ti!=0
+      if mc == 0
+        0.0
+      elsif ti!=0
         100.0 * scheduled_margin / project.cmi_project_info.total_income
       else
-        0.0
+        "< 0.0"
       end
     end
 
@@ -319,11 +325,14 @@ module CMI
     end
 
     def incurred_margin_percent
+      mc = incurred_margin
       ti = project.cmi_project_info.total_income
-      if ti!=0
+      if mc == 0
+        0.0
+      elsif ti!=0
         100.0 * incurred_margin / project.cmi_project_info.total_income
       else
-        0.0
+        "< 0.0"
       end
     end
 
@@ -788,11 +797,14 @@ module CMI
     end
 
     def scheduled_margin_percent_year(year)
+      mc = scheduled_margin_year(year)
       ti = project.cmi_project_info.total_income_year(year)
-      if ti!=0
+      if mc == 0
+        0.0
+      elsif ti!=0
         100.0 * scheduled_margin_year(year) / project.cmi_project_info.total_income_year(year)
       else
-        0.0
+        "< 0.0"
       end
     end
   end
