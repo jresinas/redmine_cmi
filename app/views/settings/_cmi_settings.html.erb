@@ -85,6 +85,25 @@
     </p>
 
     <p>
+      <label><%=l :'cmi.label_bill_vesting_date_custom_field' %></label>
+      <%
+        if Setting.plugin_redmine_cmi['bill_tracker'].present? 
+          options = ('<option></option>'+options_from_collection_for_select(Tracker.find(Setting.plugin_redmine_cmi['bill_tracker']).custom_fields, :id, :name, @settings['bill_tracker_vesting_date_custom_field'].to_i)).html_safe
+        else
+          options = ('<option></option>').html_safe
+        end
+      %>
+      <%= select_tag 'settings[bill_tracker_vesting_date_custom_field]', options %>
+
+      <!-- observe_field replacement for Redmine 2.3-->
+      <script>
+        $('#settings_bill_tracker').change(function(){
+        $('#settings_bill_tracker_vesting_date_custom_field').load('/settings/show_tracker_custom_fields', {tracker: $('#settings_bill_tracker').val()});
+        });
+      </script>
+    </p> 
+
+    <p>
       <label><%=l :'cmi.label_bill_paid_date_custom_field' %></label>
       <%
         if Setting.plugin_redmine_cmi['bill_tracker'].present? 
@@ -118,6 +137,25 @@
       <script>
         $('#settings_providers_tracker').change(function(){
         $('#settings_providers_tracker_custom_field').load('/settings/show_tracker_custom_fields', {tracker: $('#settings_providers_tracker').val()});
+        });
+      </script>
+    </p>
+
+    <p>
+      <label><%=l :'cmi.label_provider_vesting_date_custom_field' %></label>
+      <%
+        if Setting.plugin_redmine_cmi['providers_tracker'].present? 
+          options = ('<option></option>'+options_from_collection_for_select(Tracker.find(Setting.plugin_redmine_cmi['providers_tracker']).custom_fields, :id, :name, @settings['providers_tracker_vesting_date_custom_field'].to_i)).html_safe
+        else
+          options = ('<option></option>').html_safe
+        end
+      %>
+      <%= select_tag 'settings[providers_tracker_vesting_date_custom_field]', options %>
+
+      <!-- observe_field replacement for Redmine 2.3-->
+      <script>
+        $('#settings_providers_tracker').change(function(){
+        $('#settings_providers_tracker_vesting_date_custom_field').load('/settings/show_tracker_custom_fields', {tracker: $('#settings_providers_tracker').val()});
         });
       </script>
     </p>

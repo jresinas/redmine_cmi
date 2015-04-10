@@ -145,10 +145,14 @@ module CMI
       end
     end
 
-    def material_cost_incurred
+    def material_cost_incurred(paid = false)
       providers_tracker_id = Setting.plugin_redmine_cmi['providers_tracker']
       invoice_id = Setting.plugin_redmine_cmi['providers_tracker_custom_field']
-      paid_date_id = Setting.plugin_redmine_cmi['providers_tracker_paid_date_custom_field']
+      if paid
+        paid_date_id = Setting.plugin_redmine_cmi['providers_tracker_paid_date_custom_field']
+      else
+        paid_date_id = Setting.plugin_redmine_cmi['providers_tracker_vesting_date_custom_field']
+      end
       paid_statuses = Setting.plugin_redmine_cmi['providers_paid_statuses']
       result = 0.0
 
@@ -264,8 +268,8 @@ module CMI
       end
     end
 
-    def total_cost_incurred
-      hhrr_cost_incurred + material_cost_incurred + bpo_cost_incurred
+    def total_cost_incurred(paid = false)
+      hhrr_cost_incurred + material_cost_incurred(paid) + bpo_cost_incurred
     end
 
     def total_cost_scheduled
@@ -507,10 +511,14 @@ module CMI
       end
     end
 
-    def total_income_incurred
+    def total_income_incurred(paid = false)
       bills_tracker_id = Setting.plugin_redmine_cmi['bill_tracker']
       amount_field_id = Setting.plugin_redmine_cmi['bill_amount_custom_field']
-      paid_date_id = Setting.plugin_redmine_cmi['bill_tracker_paid_date_custom_field']
+      if paid
+        paid_date_id = Setting.plugin_redmine_cmi['bill_tracker_paid_date_custom_field']
+      else
+        paid_date_id = Setting.plugin_redmine_cmi['bill_tracker_vesting_date_custom_field']
+      end
       paid_statuses = Setting.plugin_redmine_cmi['bill_paid_statuses']
       result = 0.0
 
@@ -530,6 +538,7 @@ module CMI
       result
     end
 
+=begin
     def total_income_scheduled
       bills_tracker_id = Setting.plugin_redmine_cmi['bill_tracker']
       amount_field_id = Setting.plugin_redmine_cmi['bill_amount_custom_field']
@@ -545,9 +554,10 @@ module CMI
 
       result
     end
+=end
 
     def cashflow_current
-      total_income_incurred - total_cost_incurred
+      total_income_incurred(true) - total_cost_incurred(true)
     end
 
     def cashflow_percent
@@ -610,7 +620,7 @@ module CMI
     def material_cost_incurred_year(year)
       providers_tracker_id = Setting.plugin_redmine_cmi['providers_tracker']
       invoice_id = Setting.plugin_redmine_cmi['providers_tracker_custom_field']
-      paid_date_id = Setting.plugin_redmine_cmi['providers_tracker_paid_date_custom_field']
+      paid_date_id = Setting.plugin_redmine_cmi['providers_tracker_vesting_date_custom_field']
       paid_statuses = Setting.plugin_redmine_cmi['providers_paid_statuses']
       result = 0.0
 
@@ -632,7 +642,7 @@ module CMI
     def material_cost_scheduled_year(year)
       providers_tracker_id = Setting.plugin_redmine_cmi['providers_tracker']
       invoice_id = Setting.plugin_redmine_cmi['providers_tracker_custom_field']
-      paid_date_id = Setting.plugin_redmine_cmi['providers_tracker_paid_date_custom_field']
+      paid_date_id = Setting.plugin_redmine_cmi['providers_tracker_vesting_date_custom_field']
 
       result = 0.0
       

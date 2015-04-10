@@ -144,8 +144,10 @@ es:
     label_bills: Facturas
     label_providers: Proveedores
     label_bill_amount_custom_field: Cantidad ingresada por factura
+    label_bill_vesting_date_custom_field: Fecha de devengo de la factura
     label_bill_paid_date_custom_field: Fecha de pago de la factura
     label_provider_amount_custom_field: Cantidad gastada por proveedor
+    label_provider_vesting_date_custom_field: Fecha de devengo de proveedor
     label_provider_paid_date_custom_field: Fecha de pago del proveedor
     label_bill_paid_statuses: Estados de factura pagada
     label_providers_paid_statuses: Estados de proveedor pagado
