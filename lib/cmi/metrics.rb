@@ -154,18 +154,29 @@ module CMI
         paid_date_id = Setting.plugin_redmine_cmi['providers_tracker_vesting_date_custom_field']
       end
       paid_statuses = Setting.plugin_redmine_cmi['providers_paid_statuses']
+
       result = 0.0
 
       if providers_tracker_id.present? && invoice_id.present? && paid_statuses.present? && paid_date_id.present?
-        paid_statuses = paid_statuses.collect(&:to_i)   
-        providers = Issue.find_all_by_project_id_and_tracker_id(project.id, providers_tracker_id)
+        paid_statuses = paid_statuses.collect(&:to_i)
 
-        providers.each do |provider|
-          paid_date = CustomValue.find_by_custom_field_id_and_customized_id(paid_date_id, provider.id)
-          if provider.status_id.in?(paid_statuses) && (paid_date.value <= date.to_s)
-            result += CustomValue.find_by_custom_field_id_and_customized_id(invoice_id, provider.id).value.to_f
-          end
-        end
+        result = Issue.sum('paid_amount.value',
+                           :joins => 'LEFT JOIN custom_values AS paid_amount ON issues.id = paid_amount.customized_id 
+                                      LEFT JOIN custom_values AS paid_date ON issues.id = paid_date.customized_id',
+                           :conditions => ["issues.project_id = ? AND
+                                            issues.tracker_id = ? AND 
+                                            issues.status_id IN (?) AND 
+                                            paid_amount.custom_field_id = ? AND 
+                                            paid_date.custom_field_id = ? AND 
+                                            paid_date.value <= ?", 
+                                            project.id,
+                                            providers_tracker_id,
+                                            paid_statuses.collect(&:to_i),
+                                            invoice_id, 
+                                            paid_date_id,
+                                            date.to_s
+                                           ]
+                          ).to_f
       end
 
       result
@@ -177,11 +188,17 @@ module CMI
       result = 0.0
       
       if providers_tracker_id.present? && invoice_id.present?
-        providers = Issue.find_all_by_project_id_and_tracker_id(project.id, providers_tracker_id)
-
-        providers.each do |provider|
-          result += CustomValue.find_by_custom_field_id_and_customized_id(invoice_id, provider.id).value.to_f
-        end
+        result = Issue.sum('custom_values.value', 
+                           :include => :custom_values,
+                           :conditions => ["issues.project_id = ? AND
+                                            issues.tracker_id = ? AND 
+                                            custom_values.custom_field_id = ?", 
+                                            project.id, 
+                                            providers_tracker_id, 
+                                            invoice_id
+                                          ]
+                          ).to_f
+ 
       end
 
       result
@@ -221,12 +238,19 @@ module CMI
       cost = 0
 
       if bpo_tracker_id.present? && coste_anyo_id.present?
-        project.issues.each do |issue|
-          if issue.tracker.id == bpo_tracker_id.to_i && issue.due_date.present? && issue.start_date.present?
-            year_cost = CustomValue.find(:first, :conditions => ['custom_field_id = ? AND customized_id = ?', coste_anyo_id, issue.id]).value.to_i
-            cost += ((issue.due_date - issue.start_date + 1) / 365) * year_cost
-           end  
-        end
+        cost = Issue.find(:all,
+                          :include => :custom_values,
+                          :conditions => ["issues.project_id = ? AND
+                                           issues.tracker_id = ? AND 
+                                           custom_values.custom_field_id = ?", 
+                                           project.id, 
+                                           bpo_tracker_id, 
+                                           coste_anyo_id
+                                         ]
+                          ).collect{|issue| 
+                            ((issue.due_date - issue.start_date + 1) / 365) * issue.custom_values[0].value.to_f 
+                          }.sum
+
       end
 
       cost
@@ -237,16 +261,28 @@ module CMI
       coste_anyo_id = Setting.plugin_redmine_cmi['bpo_tracker_custom_field']
       cost = 0
 
-      if bpo_tracker_id.present? && coste_anyo_id.present?
-        project.issues.each do |issue|
-          if issue.tracker.id == bpo_tracker_id.to_i && issue.due_date.present? && issue.start_date.present? && issue.start_date <= date && issue.due_date >= date
-            year_cost = CustomValue.find(:first, :conditions => ['custom_field_id = ? AND customized_id = ?', coste_anyo_id, issue.id]).value.to_i
-            cost += ((issue.due_date - date + 1) / 365) * year_cost
-          elsif issue.tracker.id == bpo_tracker_id.to_i && issue.due_date.present? && issue.start_date.present? && issue.start_date > date && issue.due_date >= date
-            year_cost = CustomValue.find(:first, :conditions => ['custom_field_id = ? AND customized_id = ?', coste_anyo_id, issue.id]).value.to_i
-            cost += ((issue.due_date - issue.start_date + 1) / 365) * year_cost
-          end  
-        end
+      if bpo_tracker_id.present? and coste_anyo_id.present?
+        cost = Issue.find(:all,
+                          :include => :custom_values,
+                          :conditions => ["issues.project_id = ? AND
+                                           issues.tracker_id = ? AND
+                                           issues.start_date IS NOT NULL AND
+                                           issues.due_date IS NOT NULL AND
+                                           custom_values.custom_field_id = ?",
+                                           project.id,
+                                           bpo_tracker_id,
+                                           coste_anyo_id]
+                          ).collect{|issue| 
+                            year_cost = issue.custom_values[0].value.to_f
+
+                            if issue.start_date <= date and issue.due_date >= date
+                              ((issue.due_date - date + 1) / 365) * year_cost
+                            elsif issue.start_date > date and issue.due_date >= date
+                              ((issue.due_date - issue.start_date + 1) / 365) * year_cost
+                            else
+                              0
+                            end
+                          }.sum
       end
 
       cost
@@ -523,16 +559,23 @@ module CMI
       result = 0.0
 
       if bills_tracker_id.present? && amount_field_id.present? && paid_date_id.present? && paid_statuses.present?
-        paid_statuses = paid_statuses.collect(&:to_i)   
-        bills = Issue.find_all_by_project_id_and_tracker_id(project.id, bills_tracker_id)
+        paid_statuses = paid_statuses.collect(&:to_i)
 
-        bills.each do |bill|
-          paid_date = CustomValue.find_by_custom_field_id_and_customized_id(paid_date_id, bill.id)
-
-          if bill.status_id.in?(paid_statuses) && (paid_date.value <= date.to_s)
-            result += CustomValue.find_by_custom_field_id_and_customized_id(amount_field_id, bill.id).value.to_f
-          end
-        end
+        result = Issue.sum('amount.value',
+                           :joins => 'LEFT JOIN custom_values AS amount ON issues.id = amount.customized_id 
+                                      LEFT JOIN custom_values AS paid_date ON issues.id = paid_date.customized_id',
+                           :conditions => ["issues.project_id = ? AND
+                                            issues.tracker_id = ? AND
+                                            issues.status_id IN (?) AND
+                                            amount.custom_field_id = ? AND
+                                            paid_date.custom_field_id = ? AND
+                                            paid_date.value <= ?",
+                                            project.id,
+                                            bills_tracker_id,
+                                            paid_statuses.collect(&:to_i),
+                                            amount_field_id,
+                                            paid_date_id,
+                                            date.to_s]).to_f
       end
 
       result
@@ -573,17 +616,25 @@ module CMI
 
     # Métricas para vista anual
 
-    def effort_done_by_role_year(role, year)
+    def effort_done_by_role_year(role)
+      year = date.year
       project.effort_done_by_role_yearly(role, ("01/01/"+year.to_s).to_time, [Date.today, ("31/12/"+year.to_s).to_time].min)
     end
 
-    def effort_done_year(year)
-      User.roles.inject(0.0) { |sum, role| sum + effort_done_by_role_year(role,year) }
+    def effort_done_year
+      year = date.year
+      User.roles.inject(0.0) { |sum, role| sum + effort_done_by_role_year(role) }
     end
 
-    def effort_scheduled_by_role_year(role, year)
+    def effort_scheduled_by_role_year(role, rec_year = nil)
+      if rec_year != nil
+        year = rec_year
+      else
+        year = date.year
+      end
+      
       if year < [Date.today.year,project.finish_date.year].min
-        result = effort_done_by_role_year(role, year)
+        result = effort_done_by_role_year(role)
       else
         if project.start_date.year < year
           total_scheduled_before = (project.start_date.year..year-1).inject(0.0){|sum, y| sum+effort_scheduled_by_role_year(role,y)}
@@ -592,7 +643,7 @@ module CMI
         end
         project_effort_left = (@project.cmi_checkpoints.last.scheduled_role_effort(role).to_f - total_scheduled_before)
 
-        if project_effort_left > effort_done_by_role_year(role, year)
+        if project_effort_left > effort_done_by_role_year(role)
           year_days_left = ([project.finish_date.to_date,("31/12/"+year.to_s).to_date].min - Date.today).to_f
           project_days_left = (project.finish_date.to_date - Date.today).to_f
 
@@ -605,19 +656,23 @@ module CMI
       result
     end
 
-    def effort_scheduled_year(year)
-      User.roles.inject(0.0) { |sum, role| sum + effort_scheduled_by_role_year(role,year) }
+    def effort_scheduled_year
+      year = date.year
+      User.roles.inject(0.0) { |sum, role| sum + effort_scheduled_by_role_year(role) }
     end
 
-    def effort_remaining_by_role_year(role, year)
-      effort_scheduled_by_role_year(role, year) - effort_done_by_role_year(role, year)
+    def effort_remaining_by_role_year(role)
+      year = date.year
+      effort_scheduled_by_role_year(role) - effort_done_by_role_year(role)
     end
 
-    def effort_remaining_year(year)
-      User.roles.inject(0.0) { |sum, role| sum + effort_remaining_by_role_year(role,year) }
+    def effort_remaining_year
+      year = date.year
+      User.roles.inject(0.0) { |sum, role| sum + effort_remaining_by_role_year(role) }
     end
 
-    def material_cost_incurred_year(year)
+    def material_cost_incurred_year
+      year = date.year
       providers_tracker_id = Setting.plugin_redmine_cmi['providers_tracker']
       invoice_id = Setting.plugin_redmine_cmi['providers_tracker_custom_field']
       paid_date_id = Setting.plugin_redmine_cmi['providers_tracker_vesting_date_custom_field']
@@ -626,20 +681,33 @@ module CMI
 
       if providers_tracker_id.present? && invoice_id.present? && paid_statuses.present? && paid_date_id.present?
         paid_statuses = paid_statuses.collect(&:to_i)   
-        providers = Issue.find_all_by_project_id_and_tracker_id(project.id, providers_tracker_id)
-
-        providers.each do |provider|
-          paid_date = CustomValue.find_by_custom_field_id_and_customized_id(paid_date_id, provider.id)
-          if provider.status_id.in?(paid_statuses) && (paid_date.value.to_date >= ("01/01/"+year.to_s).to_date) && (paid_date.value.to_date <= [("31/12/"+year.to_s).to_date, Date.today].min)
-            result += CustomValue.find_by_custom_field_id_and_customized_id(invoice_id, provider.id).value.to_f
-          end
-        end
+#=begin
+        result = Issue.sum('amount.value',
+                           :joins => 'LEFT JOIN custom_values AS amount ON issues.id = amount.customized_id 
+                                      LEFT JOIN custom_values AS paid_date ON issues.id = paid_date.customized_id',
+                           :conditions => ["issues.project_id = ? AND
+                                            issues.tracker_id = ? AND
+                                            issues.status_id IN (?) AND
+                                            amount.custom_field_id = ? AND
+                                            paid_date.custom_field_id = ? AND
+                                            paid_date.value >= ? AND
+                                            paid_date.value <= ?",
+                                            project.id,
+                                            providers_tracker_id,
+                                            paid_statuses.collect(&:to_i),
+                                            invoice_id,
+                                            paid_date_id,
+                                            ("01/01/"+year.to_s).to_date,
+                                            [("31/12/"+year.to_s).to_date, Date.today].min
+                                          ]
+                          ).to_f
       end
 
       result
     end
 
-    def material_cost_scheduled_year(year)
+    def material_cost_scheduled_year
+      year = date.year
       providers_tracker_id = Setting.plugin_redmine_cmi['providers_tracker']
       invoice_id = Setting.plugin_redmine_cmi['providers_tracker_custom_field']
       paid_date_id = Setting.plugin_redmine_cmi['providers_tracker_vesting_date_custom_field']
@@ -647,63 +715,100 @@ module CMI
       result = 0.0
       
       if providers_tracker_id.present? && invoice_id.present?
-        providers = Issue.find_all_by_project_id_and_tracker_id(project.id, providers_tracker_id)
-
-        providers.each do |provider|
-          paid_date = CustomValue.find_by_custom_field_id_and_customized_id(paid_date_id, provider.id)
-
-          if paid_date.value.to_date.year == year
-            result += CustomValue.find_by_custom_field_id_and_customized_id(invoice_id, provider.id).value.to_f
-          end
-        end
+        result = Issue.sum('amount.value',
+                           :joins => 'LEFT JOIN custom_values AS amount ON issues.id = amount.customized_id 
+                                      LEFT JOIN custom_values AS paid_date ON issues.id = paid_date.customized_id',
+                           :conditions => ["issues.project_id = ? AND
+                                            issues.tracker_id = ? AND
+                                            amount.custom_field_id = ? AND
+                                            paid_date.custom_field_id = ? AND
+                                            paid_date.value >= ? AND
+                                            paid_date.value <= ?",
+                                            project.id,
+                                            providers_tracker_id,
+                                            invoice_id,
+                                            paid_date_id,
+                                            ("01/01/"+year.to_s).to_date,
+                                            ("31/12/"+year.to_s).to_date
+                                          ]
+                          ).to_f
       end
 
       result
     end
 
-    def material_cost_remaining_year(year)
-      material_cost_scheduled_year(year) - material_cost_incurred_year(year)
+    def material_cost_remaining_year
+      year = date.year
+      material_cost_scheduled_year - material_cost_incurred_year
     end
 
-    def bpo_cost_incurred_year(year)
+    def bpo_cost_incurred_year
+      year = date.year
       bpo_tracker_id = Setting.plugin_redmine_cmi['bpo_tracker']
       coste_anyo_id = Setting.plugin_redmine_cmi['bpo_tracker_custom_field']
       cost = 0
 
       if bpo_tracker_id.present? && coste_anyo_id.present?
-        project.issues.each do |issue|
-          if issue.tracker.id == bpo_tracker_id.to_i && issue.due_date.present? && issue.start_date.present? && issue.start_date.to_date <= Date.today && issue.due_date.to_date.year >= year && issue.start_date.to_date.year <= year
-            year_cost = CustomValue.find(:first, :conditions => ['custom_field_id = ? AND customized_id = ?', coste_anyo_id, issue.id]).value.to_f
-            cost += (([issue.due_date.to_date,Date.today].min - [issue.start_date.to_date,("01/01/"+year.to_s).to_date].max + 1) / 365) * year_cost
-          end
-        end
+        cost = Issue.find(:all,
+                          :include => :custom_values,
+                          :conditions => ["issues.project_id = ? AND
+                                           issues.tracker_id = ? AND 
+                                           custom_values.custom_field_id = ? AND
+                                           issues.start_date IS NOT NULL AND
+                                           issues.due_date IS NOT NULL AND
+                                           issues.start_date <= ? AND
+                                           issues.due_date >= ?", 
+                                           project.id, 
+                                           bpo_tracker_id, 
+                                           coste_anyo_id,
+                                           [("31/12/"+year.to_s).to_date, Date.today].min,
+                                           ("01/01/"+year.to_s).to_date
+                                         ]
+                          ).collect{|issue| 
+                            (([issue.due_date.to_date,Date.today,("31/12/"+year.to_s).to_date].min - [issue.start_date.to_date,("01/01/"+year.to_s).to_date].max + 1) / 365) * issue.custom_values[0].value.to_f 
+                          }.sum
       end
 
       cost
     end
 
-    def bpo_cost_scheduled_year(year)
+    def bpo_cost_scheduled_year
+      year = date.year
       bpo_tracker_id = Setting.plugin_redmine_cmi['bpo_tracker']
       coste_anyo_id = Setting.plugin_redmine_cmi['bpo_tracker_custom_field']
       cost = 0
 
       if bpo_tracker_id.present? && coste_anyo_id.present?
-        project.issues.each do |issue|
-          if issue.tracker.id == bpo_tracker_id.to_i && issue.due_date.present? && issue.start_date.present? && issue.start_date.to_date.year <= year && issue.due_date.to_date.year >= year
-            year_cost = CustomValue.find(:first, :conditions => ['custom_field_id = ? AND customized_id = ?', coste_anyo_id, issue.id]).value.to_f
-            cost += (([issue.due_date.to_date,("31/12/"+year.to_s).to_date].min - [issue.start_date.to_date,("01/01/"+year.to_s).to_date].max + 1) / 365) * year_cost
-           end  
-        end
+        cost = Issue.find(:all,
+                          :include => :custom_values,
+                          :conditions => ["issues.project_id = ? AND
+                                           issues.tracker_id = ? AND 
+                                           custom_values.custom_field_id = ? AND
+                                           issues.start_date IS NOT NULL AND
+                                           issues.due_date IS NOT NULL AND
+                                           issues.start_date <= ? AND
+                                           issues.due_date >= ?", 
+                                           project.id, 
+                                           bpo_tracker_id, 
+                                           coste_anyo_id,
+                                           ("31/12/"+year.to_s).to_date,
+                                           ("01/01/"+year.to_s).to_date
+                                         ]
+                          ).collect{|issue| 
+                            (([issue.due_date.to_date,("31/12/"+year.to_s).to_date].min - [issue.start_date.to_date,("01/01/"+year.to_s).to_date].max + 1) / 365) * issue.custom_values[0].value.to_f 
+                          }.sum
       end
 
       cost
     end
 
-    def bpo_cost_remaining_year(year)
-      bpo_cost_scheduled_year(year) - bpo_cost_incurred_year(year)
+    def bpo_cost_remaining_year
+      year = date.year
+      bpo_cost_scheduled_year - bpo_cost_incurred_year
     end
 
-    def hhrr_cost_incurred_year(year)
+    def hhrr_cost_incurred_year
+      year = date.year
       cond = [ project.project_condition(Setting.display_subprojects_issues?) <<
                ' AND (spent_on >= ?)' <<
                ' AND (spent_on <= ?)',
@@ -713,101 +818,147 @@ module CMI
                     :conditions => cond)
     end
 
-    def hhrr_cost_scheduled_year(year)
-      User.roles.inject(hhrr_cost_incurred_year(year)) { |sum, role|
-        sum += ((effort_scheduled_by_role_year(role,year) - effort_done_by_role_year(role,year)) *
+    def hhrr_cost_scheduled_year
+      year = date.year
+      User.roles.inject(hhrr_cost_incurred_year) { |sum, role|
+        sum += ((effort_scheduled_by_role_year(role) - effort_done_by_role_year(role)) *
                 (HistoryProfilesCost.find(:first,
                                           :conditions => ['profile = ? AND year <= ?', role, date.year],
                                           :order => 'year DESC').try(:value) || 0.0))
       }
     end
 
-    def hhrr_cost_remaining_year(year)
-      hhrr_cost_scheduled_year(year) - hhrr_cost_incurred_year(year)
+    def hhrr_cost_remaining_year
+      year = date.year
+      hhrr_cost_scheduled_year - hhrr_cost_incurred_year
     end
 
-    def total_cost_incurred_year(year)
-      hhrr_cost_incurred_year(year) + material_cost_incurred_year(year) + bpo_cost_incurred_year(year)
+    def total_cost_incurred_year
+      year = date.year
+      hhrr_cost_incurred_year + material_cost_incurred_year + bpo_cost_incurred_year
     end
 
-    def total_cost_scheduled_year(year)
-      hhrr_cost_scheduled_year(year) + material_cost_scheduled_year(year) + bpo_cost_scheduled_year(year)
+    def total_cost_scheduled_year
+      year = date.year
+      hhrr_cost_scheduled_year + material_cost_scheduled_year + bpo_cost_scheduled_year
     end
 
-    def total_cost_remaining_year(year)
-      total_cost_scheduled_year(year) - total_cost_incurred_year(year)
+    def total_cost_remaining_year
+      year = date.year
+      total_cost_scheduled_year - total_cost_incurred_year
     end
 
 
-    def hhrr_cost_percent_incurred_year(year)
-      if hhrr_cost_scheduled_year(year).zero?
+    def hhrr_cost_percent_incurred_year
+      year = date.year
+      if hhrr_cost_scheduled_year.zero?
         0.0
       else
-        100.0 * hhrr_cost_incurred_year(year) / hhrr_cost_scheduled_year(year)
+        100.0 * hhrr_cost_incurred_year / hhrr_cost_scheduled_year
       end
     end
 
-    def material_cost_percent_incurred_year(year)
-      if material_cost_scheduled_year(year).zero?
+    def material_cost_percent_incurred_year
+      year = date.year
+      if material_cost_scheduled_year.zero?
         0.0
       else
-        100.0 * material_cost_incurred_year(year) / material_cost_scheduled_year(year)
+        100.0 * material_cost_incurred_year / material_cost_scheduled_year
       end
     end
 
-    def bpo_cost_percent_incurred_year(year)
-      if bpo_cost_scheduled_year(year).zero?
+    def bpo_cost_percent_incurred_year
+      year = date.year
+      if bpo_cost_scheduled_year.zero?
         0.0
       else
-        100.0 * bpo_cost_incurred_year(year) / bpo_cost_scheduled_year(year)
+        100.0 * bpo_cost_incurred_year / bpo_cost_scheduled_year
       end
     end
 
-    def total_cost_percent_incurred_year(year)
-      if total_cost_scheduled_year(year).zero?
+    def total_cost_percent_incurred_year
+      year = date.year
+      if total_cost_scheduled_year.zero?
         0.0
       else
-        100.0 * total_cost_incurred_year(year) / total_cost_scheduled_year(year)
-      end
-    end
-
-
-    def hhrr_cost_percent_year(year)
-      if total_cost_scheduled_year(year).zero?
-        0.0
-      else
-        100.0 * hhrr_cost_scheduled_year(year) / total_cost_scheduled_year(year)
-      end
-    end
-
-    def material_cost_percent_year(year)
-      if total_cost_scheduled_year(year).zero?
-        0.0
-      else
-        100.0 * material_cost_scheduled_year(year) / total_cost_scheduled_year(year)
-      end
-    end
-
-    def bpo_cost_percent_year(year)
-      if total_cost_scheduled_year(year).zero?
-        0.0
-      else
-        100.0 * bpo_cost_scheduled_year(year) / total_cost_scheduled_year(year)
+        100.0 * total_cost_incurred_year / total_cost_scheduled_year
       end
     end
 
 
-    def scheduled_margin_year(year)
-      project.cmi_project_info.total_income_year(year) - total_cost_scheduled_year(year)
+    def hhrr_cost_percent_year
+      year = date.year
+      if total_cost_scheduled_year.zero?
+        0.0
+      else
+        100.0 * hhrr_cost_scheduled_year / total_cost_scheduled_year
+      end
     end
 
-    def scheduled_margin_percent_year(year)
-      mc = scheduled_margin_year(year)
-      ti = project.cmi_project_info.total_income_year(year)
+    def material_cost_percent_year
+      year = date.year
+      if total_cost_scheduled_year.zero?
+        0.0
+      else
+        100.0 * material_cost_scheduled_year / total_cost_scheduled_year
+      end
+    end
+
+    def bpo_cost_percent_year
+      year = date.year
+      if total_cost_scheduled_year.zero?
+        0.0
+      else
+        100.0 * bpo_cost_scheduled_year / total_cost_scheduled_year
+      end
+    end
+
+    def total_income_year
+      year = date.year
+      bills_tracker_id = Setting.plugin_redmine_cmi['bill_tracker']
+      amount_field_id = Setting.plugin_redmine_cmi['bill_amount_custom_field']
+      paid_date_id = Setting.plugin_redmine_cmi['bill_tracker_vesting_date_custom_field']
+      #paid_statuses = Setting.plugin_redmine_cmi['bill_paid_statuses']
+      result = 0.0
+
+      if bills_tracker_id.present? && amount_field_id.present? && paid_date_id.present?
+
+        result = Issue.sum('amount.value',
+                           :joins => 'LEFT JOIN custom_values AS amount ON issues.id = amount.customized_id 
+                                      LEFT JOIN custom_values AS paid_date ON issues.id = paid_date.customized_id',
+                           :conditions => ["issues.project_id = ? AND
+                                            issues.tracker_id = ? AND
+                                            amount.custom_field_id = ? AND
+                                            paid_date.custom_field_id = ? AND
+                                            paid_date.value <= ? AND
+                                            paid_date.value >= ?",
+                                            project.id,
+                                            bills_tracker_id,
+                                            amount_field_id,
+                                            paid_date_id,
+                                            ("31/12/"+year.to_s).to_date,
+                                            ("01/01/"+year.to_s).to_date
+                                          ]
+                          ).to_f
+      end
+
+      result
+    end
+
+
+    def scheduled_margin_year
+      year = date.year
+      total_income_year - total_cost_scheduled_year
+    end
+
+    def scheduled_margin_percent_year
+      year = date.year
+      mc = scheduled_margin_year
+      ti = total_income_year
       if mc == 0
         0.0
       elsif ti!=0
-        100.0 * scheduled_margin_year(year) / project.cmi_project_info.total_income_year(year)
+        100.0 * scheduled_margin_year / total_income_year
       else
         "< 0.0"
       end

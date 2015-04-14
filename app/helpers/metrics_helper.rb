@@ -1,42 +1,33 @@
 module MetricsHelper
-  def effort_done_graph(report, roles)
+  def effort_done_graph(report, roles, year = false)
     total = report.effort_done
-    percent = roles.collect { |role| total.zero? ? 0.0 : (report.effort_done_by_role(role) * 100 / total).round(2) }
+    if year
+      percent = roles.collect { |role| total.zero? ? 0.0 : (report.effort_done_by_role_year(role) * 100 / total).round(2) }
+    else
+      percent = roles.collect { |role| total.zero? ? 0.0 : (report.effort_done_by_role(role) * 100 / total).round(2) }
+    end
     labels = roles.enum_for(:each_with_index).collect{ |role, index| "#{role}: #{percent[index]}%" }
     pie_graph(percent, labels)
   end
 
-  def effort_scheduled_graph(report, roles)
+  def effort_scheduled_graph(report, roles, year = false)
     total = report.effort_scheduled
-    percent = roles.collect { |role| total.zero? ? 0.0 : (report.effort_scheduled_by_role(role) * 100.0 / total).round(2) }
+    if year
+      percent = roles.collect { |role| total.zero? ? 0.0 : (report.effort_scheduled_by_role_year(role) * 100.0 / total).round(2) }
+    else
+      percent = roles.collect { |role| total.zero? ? 0.0 : (report.effort_scheduled_by_role(role) * 100.0 / total).round(2) }
+    end
     labels = roles.enum_for(:each_with_index).collect{ |role, index| "#{role}: #{percent[index]}%" }
     pie_graph(percent, labels)
   end
 
-  def effort_remaining_graph(report, roles)
+  def effort_remaining_graph(report, roles, year = false)
     total = report.effort_remaining
-    percent = roles.collect { |role| total.zero? ? 0.0 : (report.effort_remaining_by_role(role) * 100 / total).round(2) }
-    labels = roles.enum_for(:each_with_index).collect{ |role, index| "#{role}: #{percent[index]}%" }
-    pie_graph(percent, labels)
-  end
-
-  def effort_done_year_graph(report, roles, year)
-    total = report.effort_done_year(year)
-    percent = roles.collect { |role| total.zero? ? 0.0 : (report.effort_done_by_role_year(role, year) * 100 / total).round(2) }
-    labels = roles.enum_for(:each_with_index).collect{ |role, index| "#{role}: #{percent[index]}%" }
-    pie_graph(percent, labels)
-  end
-
-  def effort_scheduled_year_graph(report, roles, year)
-    total = report.effort_scheduled_year(year)
-    percent = roles.collect { |role| total.zero? ? 0.0 : (report.effort_scheduled_by_role_year(role,year) * 100.0 / total).round(2) }
-    labels = roles.enum_for(:each_with_index).collect{ |role, index| "#{role}: #{percent[index]}%" }
-    pie_graph(percent, labels)
-  end
-
-  def effort_remaining_year_graph(report, roles, year)
-    total = report.effort_remaining_year(year)
-    percent = roles.collect { |role| total.zero? ? 0.0 : (report.effort_remaining_by_role_year(role,year) * 100 / total).round(2) }
+    if year
+      percent = roles.collect { |role| total.zero? ? 0.0 : (report.effort_remaining_by_role_year(role) * 100 / total).round(2) }
+    else
+      percent = roles.collect { |role| total.zero? ? 0.0 : (report.effort_remaining_by_role(role) * 100 / total).round(2) }
+    end
     labels = roles.enum_for(:each_with_index).collect{ |role, index| "#{role}: #{percent[index]}%" }
     pie_graph(percent, labels)
   end

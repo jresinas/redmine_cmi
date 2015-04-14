@@ -4,7 +4,7 @@
   <% @metrics.each_with_index do |metric, i| -%>
     <%= content_tag :td, :id => "profit_#{i}", :class => "issue" do -%>
       <% if metric.checkpoint.new_record? %>
-        <%= currency @project.cmi_project_info.total_income_year(metric.year) %>
+        <%= currency metric.total_income_year %>
       <% else %>
         <%= currency @project.cmi_project_info.total_income %>
       <% end %>
@@ -16,7 +16,7 @@
   <% @metrics.each_with_index do |metric, i| -%>
     <%= content_tag :td, :id => "staff_cost_currently_#{i}", :class => "issue" do -%>
       <% if metric.checkpoint.new_record? %>
-        <%= currency (metric.hhrr_cost_scheduled_year(metric.year) + metric.bpo_cost_scheduled_year(metric.year)) %>
+        <%= currency (metric.hhrr_cost_scheduled_year + metric.bpo_cost_scheduled_year) %>
       <% else %>
         <%= currency (metric.hhrr_cost_scheduled + metric.bpo_cost_scheduled) %>
       <% end %>
@@ -28,7 +28,7 @@
   <% @metrics.each_with_index do |metric, i| -%>
     <%= content_tag :td, :id => "providers_cost_#{i}", :class => "issue" do -%>
       <% if metric.checkpoint.new_record? %>
-        <%= currency metric.material_cost_scheduled_year(metric.year) %>
+        <%= currency metric.material_cost_scheduled_year %>
       <% else %>
         <%= currency metric.material_cost_scheduled %>
       <% end %>      
@@ -40,7 +40,7 @@
   <% @metrics.each_with_index do |metric, i| -%>
     <%= content_tag :td, :id => "cm_#{i}", :class => "issue" do -%>
       <% if metric.checkpoint.new_record? %>
-        <%= currency metric.scheduled_margin_year(metric.year) %> (<%= percent metric.scheduled_margin_percent_year(metric.year) %>)
+        <%= currency metric.scheduled_margin_year %> (<%= percent metric.scheduled_margin_percent_year %>)
       <% else %>
         <%= currency metric.scheduled_margin %> (<%= percent metric.scheduled_margin_percent %>)
       <% end %>      

@@ -42,31 +42,4 @@ class CmiProjectInfo < ActiveRecord::Base
     amount.to_f
   end
 
-  def total_income_year(year)
-    factura_tracker_id = Setting.plugin_redmine_cmi['bill_tracker']
-    cantidad_facturada_id = Setting.plugin_redmine_cmi['bill_amount_custom_field']
-    fecha_factura_id = Setting.plugin_redmine_cmi['bill_tracker_paid_date_custom_field']
-    amount = 0.0
-    
-    if factura_tracker_id.present? and cantidad_facturada_id.present? and fecha_factura_id.present?
-      facturas = Issue.find_all_by_project_id_and_tracker_id(project.id, factura_tracker_id).select{|f| 
-        fecha = f.custom_values.where('custom_field_id = ?',fecha_factura_id)[0]
-        if fecha.present?
-          result = (fecha.value.to_date.year == year)
-        else
-          result = false
-        end
-
-        result
-      }
-      amount = CustomValue.sum(:value, 
-                               :conditions => {:custom_field_id => cantidad_facturada_id, 
-                                               :customized_id => facturas.collect{|f| f.id},
-                                              }
-                              )
-
-    end
-
-    amount.to_f
-  end
 end

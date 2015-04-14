@@ -7,7 +7,7 @@
     <% @metrics.each_with_index do |metric, i| -%>
       <%= content_tag :td, :id => "effort_done_#{role}_#{i}", :class => "issue" do -%>
         <% if metric.checkpoint.new_record? %>
-          <%= hours metric.effort_done_by_role_year(role,metric.year) %>
+          <%= hours metric.effort_done_by_role_year(role) %>
         <% else %>
           <%= hours metric.effort_done_by_role(role) %>
         <% end %>
@@ -21,8 +21,8 @@
   <% @metrics.each_with_index do |metric, i| -%>
     <%= content_tag :td, :id => "effort_done_total_#{i}", :class => "issue" do -%>
       <% if metric.checkpoint.new_record? %>
-        <%= hours metric.effort_done_year(metric.year) %>
-        <%= effort_done_year_graph(metric, @roles, metric.year).html_safe %>
+        <%= hours metric.effort_done_year %>
+        <%= effort_done_graph(metric, @roles, true).html_safe %>
       <% else %>
         <%= hours metric.effort_done %>
         <%= effort_done_graph(metric, @roles).html_safe %>
