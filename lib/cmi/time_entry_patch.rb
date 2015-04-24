@@ -20,10 +20,15 @@ module CMI
 
     module InstanceMethods
       def update_role_and_cost
-        self.role = self.user.role
-        @hash_cost_actual_year = (HistoryProfilesCost.find :all).group_by(&:year)[self.tyear].group_by(&:profile)
-        if attribute_present?("hours") and self.role.present?
-          self.cost = (self.hours.to_f * @hash_cost_actual_year["#{self.role}"].first.value.to_f)
+        self.role = self.user.role(self.spent_on)
+        
+        if self.role.present?
+          @hash_cost_actual_year = (HistoryProfilesCost.find :all).group_by(&:year)[self.tyear].group_by(&:profile)
+          if attribute_present?("hours") and self.role.present?
+            self.cost = (self.hours.to_f * @hash_cost_actual_year["#{self.role}"].first.value.to_f) rescue 0
+          end
+        else
+          self.cost = 0
         end
       end
     end

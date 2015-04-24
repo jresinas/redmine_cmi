@@ -179,6 +179,10 @@ en-GB:
 
   activerecord:
     errors:
+      messages:
+        not_a_date: not a valid date
+        overlap: The specified range overlaps an existing range
+        finish_before_create: The finish date cannot be earlier than start date
       models:
         cmi_project_info:
            attributes:

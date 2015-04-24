@@ -184,7 +184,9 @@ es:
   activerecord:
     errors:
       messages:
-        not_a_date: no es una fecha válida  
+        not_a_date: no es una fecha válida
+        overlap: El intervalo indicado se solapa con otro existente
+        finish_before_create: La fecha de fin no puede ser inferior a la de inicio
       models:
         cmi_project_info:
            attributes:

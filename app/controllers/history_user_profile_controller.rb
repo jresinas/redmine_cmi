@@ -9,7 +9,7 @@ class HistoryUserProfileController < ApplicationController
     end
 
     if hup.update_attributes(data)
-      flash[:notice] = "El perfil ha sido editado con exito"
+      flash[:notice] = l(:notice_successful_update)
     else
       error_msg = ""
       hup.errors.full_messages.each do |msg|
@@ -39,7 +39,7 @@ class HistoryUserProfileController < ApplicationController
     @history_user_profile = HistoryUserProfile.new(data)
 
     if @history_user_profile.save
-      flash[:notice] = "El perfil ha sido guardado con éxito"  
+      flash[:notice] = l(:notice_successful_create) 
     else
       error_msg = ""
       @history_user_profile.errors.full_messages.each do |msg|
@@ -59,8 +59,8 @@ class HistoryUserProfileController < ApplicationController
   def destroy
     hup = HistoryUserProfile.find(params[:id])
 
-    if hup.delete
-      flash[:notice] = "El perfil ha sido borrado con exito"
+    if hup.destroy
+      flash[:notice] = l(:notice_successful_delete)
     else
       error_msg = ""
       hup.errors.full_messages.each do |msg|

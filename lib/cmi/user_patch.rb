@@ -20,7 +20,7 @@ module CMI
     module ClassMethods
       def roles
         role_field = UserCustomField.find_by_name(DEFAULT_VALUES['user_role_field'])
-        role_field && role_field.possible_values || []
+        role_field && role_field.possible_values.unshift(" ") || []
       end
     end
 
@@ -33,9 +33,13 @@ module CMI
         end
       end
       
-      def role
-        role_field = UserCustomField.find_by_name(DEFAULT_VALUES['user_role_field'], :select => :id)
-        custom_value_for(role_field.id).value rescue nil
+      def role(date = Date.today)
+        hup = HistoryUserProfile.find(:first, :conditions => ["user_id = ? AND DATE(created_on) <= ? AND (finished_on IS NULL OR finished_on >= ?)", self.id, date, date], :order => "created_on DESC", :select => :profile)
+        if hup.present?
+          hup.profile
+        else
+          ""
+        end
       end
 
       def role=(role)
