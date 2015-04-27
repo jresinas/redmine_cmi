@@ -1,4 +1,4 @@
-<% if params[:action] == 'show' %>
+<% if params[:controller] == 'metrics' and params[:action] == 'show' %>
 	<% user_preferences = UserPreference.find_by_user_id(User.current.id) %>	
 
 	<%= form_tag('edit_preferences', :method => :get) do %>
@@ -24,7 +24,7 @@
 		<%= label_tag "preference[cmi_metrics_others]", l(:"cmi.label_others") %><br />
 	<p><%= submit_tag l(:button_apply), :class => 'button-small', :name => nil %></p>
 	<% end %>
-<% elsif params[:action] == 'yearly' %>
+<% elsif params[:controller] == 'metrics' and params[:action] == 'yearly' %>
 	<% user_preferences = UserPreference.find_by_user_id(User.current.id) %>
 
 	<%= form_tag('edit_preferences', :method => :get) do %>
@@ -38,4 +38,5 @@
 		<%= label_tag "preference[cmi_yearly_pal]", l(:"cmi.label_pal") %><br />
 	<p><%= submit_tag l(:button_apply), :class => 'button-small', :name => nil %></p>
 	<% end %>
+<% else %>
 <% end %>

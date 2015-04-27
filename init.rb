@@ -14,6 +14,7 @@ require 'cmi/journal_patch'
 require 'cmi/issue_bpo_dates_required_patch'
 require 'cmi/settings_controller_patch'
 require 'cmi/admin_controller_patch'
+require 'cmi/hooks_view_listener'
 
 
 Redmine::Plugin.register :redmine_cmi do
