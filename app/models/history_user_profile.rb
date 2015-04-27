@@ -20,7 +20,7 @@ class HistoryUserProfile < ActiveRecord::Base
 
   def finished_on_after_created_on
     end_date = self.finished_on.present? ? self.finished_on : Date.today
-    errors.add(:base, l(:"activerecord.errors.messages.finish_before_create")) if created_on > end_date
+    errors.add(:base, l(:"activerecord.errors.messages.finish_before_create")) if self.created_on > end_date
   end
 
   def update_time_entries

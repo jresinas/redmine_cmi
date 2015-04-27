@@ -3,7 +3,7 @@
   <%= javascript_include_tag "user_history.js", :plugin => 'redmine_cmi' %>
 <% end %>
 
-<%=javascript_tag("var user_id = "+@user.id.to_s+"; var profile_options = "+User.roles.to_s+"; var at_present = '"+l('cmi.label_at_present')+"';")%>
+<%=javascript_tag("var user_id = "+@user.id.to_s+"; var profile_options = "+User.roles.unshift("").to_s+"; var at_present = '"+l('cmi.label_at_present')+"';")%>
 
 
 <% profile_list = HistoryUserProfile.find_all_by_user_id(@user.id, :order => :created_on) %>
@@ -40,7 +40,7 @@
         <%= f.hidden_field :user_id, :value => @user.id %>
         <p>
           <%= f.label :profile, l('cmi.label_profile_plural') %>
-          <%= f.select :profile, options_for_select(User.roles) %>
+          <%= f.select :profile, options_for_select(User.roles.unshift("")) %>
         </p>
         <p>
           <%= f.label :created_on, l('cmi.label_from') %>
