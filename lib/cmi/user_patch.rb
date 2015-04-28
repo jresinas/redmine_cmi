@@ -26,19 +26,33 @@ module CMI
 
     module InstanceMethods
       def update_history_user_profile
-        last_profile_status = HistoryUserProfile.find_last_by_user_id self.id
-        if self.role and (last_profile_status.blank? or self.role != last_profile_status.profile)
-          last_profile_status.update_attribute(:finished_on, Date.today) unless last_profile_status.nil?
-          HistoryUserProfile.create(:user_id => self.id, :profile => (self.custom_field_values)[0].to_s)
+        last_profile_status = HistoryUserProfile.find(:first, :conditions => ["user_id = ?", self.id], :order => 'created_on DESC')
+
+        if self.role.present? #and (!last_profile_status.present? or (self.role != last_profile_status.profile or !last_profile_status.finished_on.nil?))
+          if last_profile_status.present? and (self.role != last_profile_status.profile or !last_profile_status.finished_on.nil?)
+              if last_profile_status.created_on.to_date < DateTime.now.to_date and last_profile_status.finished_on.nil?
+                last_profile_status.update_attribute(:finished_on, DateTime.now-1.day)
+              elsif last_profile_status.created_on.to_date == DateTime.now.to_date
+                last_profile_status.destroy
+              end
+            HistoryUserProfile.create(:user_id => self.id, :profile => self.role, :created_on => DateTime.now, :finished_on => nil)
+          elsif !last_profile_status.present?
+            HistoryUserProfile.create(:user_id => self.id, :profile => self.role, :created_on => DateTime.now, :finished_on => nil)
+          end
         end
       end
       
       def role(date = Date.today)
-        hup = HistoryUserProfile.find(:first, :conditions => ["user_id = ? AND DATE(created_on) <= ? AND (finished_on IS NULL OR finished_on >= ?)", self.id, date, date], :order => "created_on DESC", :select => :profile)
-        if hup.present?
-          hup.profile
+        if date >= Date.today
+          role_field = UserCustomField.find_by_name(DEFAULT_VALUES['user_role_field'], :select => :id)
+          custom_value_for(role_field.id).value rescue nil
         else
-          ""
+          hup = HistoryUserProfile.find(:first, :conditions => ["user_id = ? AND DATE(created_on) <= ? AND (finished_on IS NULL OR finished_on >= ?)", self.id, date, date], :order => "created_on DESC", :select => :profile)
+          if hup.present?
+            hup.profile
+          else
+            ""
+          end
         end
       end
 
