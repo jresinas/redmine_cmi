@@ -28,17 +28,15 @@ module CMI
       def update_history_user_profile
         last_profile_status = HistoryUserProfile.find(:first, :conditions => ["user_id = ?", self.id], :order => 'created_on DESC')
 
-        if self.role.present? #and (!last_profile_status.present? or (self.role != last_profile_status.profile or !last_profile_status.finished_on.nil?))
-          if last_profile_status.present? and (self.role != last_profile_status.profile or !last_profile_status.finished_on.nil?)
-              if last_profile_status.created_on.to_date < DateTime.now.to_date and last_profile_status.finished_on.nil?
-                last_profile_status.update_attribute(:finished_on, DateTime.now-1.day)
-              elsif last_profile_status.created_on.to_date == DateTime.now.to_date
-                last_profile_status.destroy
-              end
-            HistoryUserProfile.create(:user_id => self.id, :profile => self.role, :created_on => DateTime.now, :finished_on => nil)
-          elsif !last_profile_status.present?
-            HistoryUserProfile.create(:user_id => self.id, :profile => self.role, :created_on => DateTime.now, :finished_on => nil)
-          end
+        if last_profile_status.present? and (self.role != last_profile_status.profile or !last_profile_status.finished_on.nil?)
+            if last_profile_status.created_on.to_date < DateTime.now.to_date and last_profile_status.finished_on.nil?
+              last_profile_status.update_attribute(:finished_on, DateTime.now-1.day)
+            elsif last_profile_status.created_on.to_date == DateTime.now.to_date
+              last_profile_status.destroy
+            end
+          HistoryUserProfile.create(:user_id => self.id, :profile => self.role, :created_on => DateTime.now, :finished_on => nil)
+        elsif !last_profile_status.present?
+          HistoryUserProfile.create(:user_id => self.id, :profile => self.role, :created_on => DateTime.now, :finished_on => nil)
         end
       end
       
