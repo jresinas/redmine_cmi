@@ -180,17 +180,61 @@
     </p>
   </fieldset>
 
-  <p>
-    <label><%=l :'cmi.caption_groups' %></label>
-    <%= text_area_tag 'settings[groups]', @settings['groups'], :rows => 15 %><br />
-    <em><%= l(:text_custom_field_possible_values_info) %></em>
-  </p>
-  <p>
-    <label><%=l :'cmi.label_coordinator_role' %></label>
-    <%= select_tag 'settings[coordinator_role]',
-        ('<option></option>' +
-          options_from_collection_for_select(User.roles, :to_s, :to_s, @settings['coordinator_role'])).html_safe %>
-  </p>
+  <fieldset>
+    <legend><%=l :label_preferences %></legend>
+    <p>
+      <label><%= l(:"cmi.label_metrics")+" - "+l(:"cmi.label_effort") %></label>
+      <%= check_box_tag "settings[cmi_metrics_effort]", 1, Setting.plugin_redmine_cmi[:cmi_metrics_effort] == "1" %>
+    </p>
+    <p>
+      <label><%= l(:"cmi.label_metrics")+" - "+l(:"cmi.label_time") %></label>
+      <%= check_box_tag "settings[cmi_metrics_time]", 1, Setting.plugin_redmine_cmi[:cmi_metrics_time] == "1" %>
+    </p>
+    <p>
+      <label><%= l(:"cmi.label_metrics")+" - "+l(:"cmi.label_cost") %></label>
+      <%= check_box_tag "settings[cmi_metrics_cost]", 1, Setting.plugin_redmine_cmi[:cmi_metrics_cost] == "1" %>
+    </p>
+    <p>
+      <label><%= l(:"cmi.label_metrics")+" - "+l(:"cmi.label_advance") %></label>
+      <%= check_box_tag "settings[cmi_metrics_advance]", 1, Setting.plugin_redmine_cmi[:cmi_metrics_advance] == "1" %>
+    </p>
+    <p>
+      <label><%= l(:"cmi.label_metrics")+" - "+l(:"cmi.label_profitability") %></label>
+      <%= check_box_tag "settings[cmi_metrics_profitability]", 1, Setting.plugin_redmine_cmi[:cmi_metrics_profitability] == "1" %>
+    </p>
+    <p>
+      <label><%= l(:"cmi.label_metrics")+" - "+l(:"cmi.label_profitability") %></label>
+      <%= check_box_tag "settings[cmi_metrics_profitability]", 1, Setting.plugin_redmine_cmi[:cmi_metrics_profitability] == "1" %>
+    </p>
+    <p>
+      <label><%= l(:"cmi.label_metrics")+" - "+l(:"cmi.label_profit") %></label>
+      <%= check_box_tag "settings[cmi_metrics_income]", 1, Setting.plugin_redmine_cmi[:cmi_metrics_income] == "1" %>
+    </p>
+    <p>
+      <label><%= l(:"cmi.label_metrics")+" - "+l(:"cmi.label_cashflow") %></label>
+      <%= check_box_tag "settings[cmi_metrics_cashflow]", 1, Setting.plugin_redmine_cmi[:cmi_metrics_cashflow] == "1" %>
+    </p>
+    <p>
+      <label><%= l(:"cmi.label_metrics")+" - "+l(:"cmi.label_deviation") %></label>
+      <%= check_box_tag "settings[cmi_metrics_deviation]", 1, Setting.plugin_redmine_cmi[:cmi_metrics_deviation] == "1" %>
+    </p>
+    <p>
+      <label><%= l(:"cmi.label_metrics")+" - "+l(:"cmi.label_others") %></label>
+      <%= check_box_tag "settings[cmi_metrics_others]", 1, Setting.plugin_redmine_cmi[:cmi_metrics_others] == "1" %>
+    </p>
+    <p>
+      <label><%= l(:"cmi.label_yearly")+" - "+l(:"cmi.label_effort") %></label>
+      <%= check_box_tag "settings[cmi_yearly_effort]", 1, Setting.plugin_redmine_cmi[:cmi_yearly_effort] == "1" %>
+    </p>
+    <p>
+      <label><%= l(:"cmi.label_yearly")+" - "+l(:"cmi.label_cost") %></label>
+      <%= check_box_tag "settings[cmi_yearly_cost]", 1, Setting.plugin_redmine_cmi[:cmi_yearly_cost] == "1" %>
+    </p>
+    <p>
+      <label><%= l(:"cmi.label_yearly")+" - "+l(:"cmi.label_pal") %></label>
+      <%= check_box_tag "settings[cmi_yearly_pal]", 1, Setting.plugin_redmine_cmi[:cmi_yearly_pal] == "1" %>
+    </p>
+  </fieldset>
 </div>
 <div class="splitcontentright">
   <p>
@@ -242,5 +286,16 @@
         :multiple => true %>
   </p>
 
+  <p>
+    <label><%=l :'cmi.caption_groups' %></label>
+    <%= text_area_tag 'settings[groups]', @settings['groups'], :rows => 15 %><br />
+    <em><%= l(:text_custom_field_possible_values_info) %></em>
+  </p>
+  <p>
+    <label><%=l :'cmi.label_coordinator_role' %></label>
+    <%= select_tag 'settings[coordinator_role]',
+        ('<option></option>' +
+          options_from_collection_for_select(User.roles, :to_s, :to_s, @settings['coordinator_role'])).html_safe %>
+  </p>
 </div>
 <div style="clear: both;"></div>

@@ -16,13 +16,19 @@
       </tr>
     </thead>
     <tbody>
-      <%= render :partial => 'metrics/yearly/project_effort_done' %>
-      <%= render :partial => 'metrics/yearly/project_effort_remaining' %>
-      <%= render :partial => 'metrics/yearly/project_effort_scheduled' %>
-      <%= render :partial => 'metrics/yearly/project_cost' %>
+      <% if @user_preference.metric_enabled('cmi_yearly_effort') %>
+        <%= render :partial => 'metrics/yearly/project_effort_done' %>
+        <%= render :partial => 'metrics/yearly/project_effort_remaining' %>
+        <%= render :partial => 'metrics/yearly/project_effort_scheduled' %>
+      <% end %>
+      <% if @user_preference.metric_enabled('cmi_yearly_cost') %>
+        <%= render :partial => 'metrics/yearly/project_cost' %>
+      <% end %>
       <%#= render :partial => 'metrics/yearly/project_profitability' %>
       <%#= render :partial => 'metrics/yearly/project_income' %>
-      <%= render :partial => 'metrics/yearly/project_pal' %>
+      <% if @user_preference.metric_enabled('cmi_yearly_pal') %>
+        <%= render :partial => 'metrics/yearly/project_pal' %>
+      <% end %>
     </tbody>
   </table>
 </div>

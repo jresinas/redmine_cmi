@@ -1,0 +1,38 @@
+<% if params[:controller] == 'metrics' and params[:action] == 'show' %>
+	<%= form_tag('edit_preferences', :method => :get) do %>
+		<h3><%= l(:label_preferences) %></h3>
+		<%= hidden_field_tag "preference_type", 'metrics' %>
+		<%= check_box_tag "preference[cmi_metrics_effort]", 1, @user_preference.metric_enabled('cmi_metrics_effort') %>
+			<%= label_tag "preference[cmi_metrics_effort]", l(:"cmi.label_effort") %><br />
+		<%= check_box_tag "preference[cmi_metrics_time]", 1, @user_preference.metric_enabled('cmi_metrics_time') %>
+			<%= label_tag "preference[cmi_metrics_time]", l(:"cmi.label_time") %><br />
+		<%= check_box_tag "preference[cmi_metrics_cost]", 1, @user_preference.metric_enabled('cmi_metrics_cost') %>
+			<%= label_tag "preference[cmi_metrics_cost]", l(:"cmi.label_cost") %><br />
+		<%= check_box_tag "preference[cmi_metrics_advance]", 1, @user_preference.metric_enabled('cmi_metrics_advance') %>
+			<%= label_tag "preference[cmi_metrics_advance]", l(:"cmi.label_advance") %><br />
+		<%= check_box_tag "preference[cmi_metrics_profitability]", 1, @user_preference.metric_enabled('cmi_metrics_profitability') %>
+			<%= label_tag "preference[cmi_metrics_profitability]", l(:"cmi.label_profitability") %><br />
+		<%= check_box_tag "preference[cmi_metrics_income]", 1, @user_preference.metric_enabled('cmi_metrics_income') %>
+			<%= label_tag "preference[cmi_metrics_income]", l(:"cmi.label_profit") %><br />
+		<%= check_box_tag "preference[cmi_metrics_cashflow]", 1, @user_preference.metric_enabled('cmi_metrics_cashflow') %>
+			<%= label_tag "preference[cmi_metrics_cashflow]", l(:"cmi.label_cashflow") %><br />
+		<%= check_box_tag "preference[cmi_metrics_deviation]", 1, @user_preference.metric_enabled('cmi_metrics_deviation') %>
+			<%= label_tag "preference[cmi_metrics_deviation]", l(:"cmi.label_deviation") %><br />
+		<%= check_box_tag "preference[cmi_metrics_others]", 1, @user_preference.metric_enabled('cmi_metrics_others') %>
+			<%= label_tag "preference[cmi_metrics_others]", l(:"cmi.label_others") %><br />
+		<p><%= submit_tag l(:button_apply), :class => 'button-small', :name => nil %></p>
+	<% end %>
+<% elsif params[:controller] == 'metrics' and params[:action] == 'yearly' %>
+	<%= form_tag('edit_preferences', :method => :get) do %>
+		<h3><%= l(:label_preferences) %></h3>
+		<%= hidden_field_tag "preference_type", 'yearly' %>
+		<%= check_box_tag "preference[cmi_yearly_effort]", 1, @user_preference.metric_enabled('cmi_yearly_effort') %>
+			<%= label_tag "preference[cmi_yearly_effort]", l(:"cmi.label_effort") %><br />
+		<%= check_box_tag "preference[cmi_yearly_cost]", 1, @user_preference.metric_enabled('cmi_yearly_cost') %>
+			<%= label_tag "preference[cmi_yearly_cost]", l(:"cmi.label_cost") %><br />
+		<%= check_box_tag "preference[cmi_yearly_pal]", 1, @user_preference.metric_enabled('cmi_yearly_pal') %>
+			<%= label_tag "preference[cmi_yearly_pal]", l(:"cmi.label_pal") %><br />
+		<p><%= submit_tag l(:button_apply), :class => 'button-small', :name => nil %></p>
+	<% end %>
+<% else %>
+<% end %>

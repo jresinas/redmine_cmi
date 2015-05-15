@@ -14,6 +14,8 @@ require 'cmi/journal_patch'
 require 'cmi/issue_bpo_dates_required_patch'
 require 'cmi/settings_controller_patch'
 require 'cmi/admin_controller_patch'
+require 'cmi/hooks_view_listener'
+require 'cmi/user_preference_patch'
 
 
 Redmine::Plugin.register :redmine_cmi do
@@ -37,8 +39,8 @@ Redmine::Plugin.register :redmine_cmi do
   project_module :cmiplugin do
     permission :cmi_management, { :management => [:status, :projects, :groups] }
 
-    permission :cmi_view_metrics, { :metrics => :show }
-    permission :cmi_view_yearly, {:metrics => :yearly}
+    permission :cmi_view_metrics, { :metrics => [:show, :edit_preferences] }
+    permission :cmi_view_yearly, {:metrics => [:yearly, :edit_preferences] }
     permission :cmi_project_info, { :metrics => :info }
 
     permission :cmi_add_checkpoints, { :checkpoints => [:new, :create, :preview] }

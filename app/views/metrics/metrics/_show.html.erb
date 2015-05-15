@@ -20,31 +20,49 @@
       </tr>
     </thead>
     <tbody>
-      <%= render :partial => 'metrics/metrics/project_effort_done' %>
-      <%= render :partial => 'metrics/metrics/project_effort_remaining' %>
-      <%= render :partial => 'metrics/metrics/project_effort_scheduled' %>
-      <%= render :partial => 'metrics/metrics/project_time' %>
-      <%= render :partial => 'metrics/metrics/project_cost' %>
-      <%= render :partial => 'metrics/metrics/project_advance' %>
+      <% if @user_preference.metric_enabled('cmi_metrics_effort') %>
+        <%= render :partial => 'metrics/metrics/project_effort_done' %>
+        <%= render :partial => 'metrics/metrics/project_effort_remaining' %>
+        <%= render :partial => 'metrics/metrics/project_effort_scheduled' %>
+      <% end %>
+      <% if @user_preference.metric_enabled('cmi_metrics_time') %>
+        <%= render :partial => 'metrics/metrics/project_time' %>
+      <% end %>
+      <% if @user_preference.metric_enabled('cmi_metrics_cost') %>
+        <%= render :partial => 'metrics/metrics/project_cost' %>
+      <% end %>
+      <% if @user_preference.metric_enabled('cmi_metrics_advance') %>
+        <%= render :partial => 'metrics/metrics/project_advance' %>
+      <% end %>
+      <% if @user_preference.metric_enabled('cmi_metrics_profitability') %>
       <%= render :partial => 'metrics/metrics/project_profitability' %>
-      <%= render :partial => 'metrics/metrics/project_income' %>
+      <% end %>
+      <% if @user_preference.metric_enabled('cmi_metrics_income') %>
+        <%= render :partial => 'metrics/metrics/project_income' %>
+      <% end %>
+      <% if @user_preference.metric_enabled('cmi_metrics_cashflow') %>
       <%= render :partial => 'metrics/metrics/project_cashflow' %>
-      <%= render :partial => 'metrics/metrics/project_deviation' %>
-
-      <% unless Setting.plugin_redmine_cmi['risks_tracker'].blank? %>
-        <%= render :partial => 'metrics/metrics/project_risk' %>
+      <% end %>
+      <% if @user_preference.metric_enabled('cmi_metrics_deviation') %>
+        <%= render :partial => 'metrics/metrics/project_deviation' %>
       <% end %>
 
-      <% unless Setting.plugin_redmine_cmi['incidents_tracker'].blank? %>
-        <%= render :partial => 'metrics/metrics/project_incident' %>
-      <% end %>
+      <% if @user_preference.metric_enabled('cmi_metrics_others') %>
+        <% unless Setting.plugin_redmine_cmi['risks_tracker'].blank? %>
+          <%= render :partial => 'metrics/metrics/project_risk' %>
+        <% end %>
 
-      <% unless Setting.plugin_redmine_cmi['changes_tracker'].blank? %>
-        <%= render :partial => 'metrics/metrics/changes' %>
-      <% end %>
+        <% unless Setting.plugin_redmine_cmi['incidents_tracker'].blank? %>
+          <%= render :partial => 'metrics/metrics/project_incident' %>
+        <% end %>
 
-      <% unless Setting.plugin_redmine_cmi['qa_tracker'].blank? %>
-        <%= render :partial => 'metrics/metrics/qa' %>
+        <% unless Setting.plugin_redmine_cmi['changes_tracker'].blank? %>
+          <%= render :partial => 'metrics/metrics/changes' %>
+        <% end %>
+
+        <% unless Setting.plugin_redmine_cmi['qa_tracker'].blank? %>
+          <%= render :partial => 'metrics/metrics/qa' %>
+        <% end %>
       <% end %>
     </tbody>
   </table>

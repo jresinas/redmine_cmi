@@ -9,6 +9,8 @@ class MetricsController < ApplicationController
 
   def show
     begin
+      @user_preference = UserPreference.find_by_user_id(User.current.id)
+
       @checkpoints = @project.cmi_checkpoints.find(:all,
                                                    :order => 'checkpoint_date DESC',
                                                    :limit => (2 if params[:metrics].nil?),
@@ -28,6 +30,8 @@ class MetricsController < ApplicationController
   end
 
   def yearly
+    @user_preference = UserPreference.find_by_user_id(User.current.id)
+    
     finish_date = @project.finish_date
     start_date = @project.start_date 
 
@@ -62,6 +66,28 @@ class MetricsController < ApplicationController
     if request.put? || request.post?
       @cmi_project_info.attributes = params[:cmi_project_info]
       flash[:notice] = l(:notice_successful_update) if @cmi_project_info.save
+    end
+  end
+
+  def edit_preferences
+    options = {'metrics' => [:cmi_metrics_effort, :cmi_metrics_time, :cmi_metrics_cost, :cmi_metrics_advance, :cmi_metrics_profitability, :cmi_metrics_income, :cmi_metrics_cashflow, :cmi_metrics_deviation, :cmi_metrics_others],
+               'yearly' => [:cmi_yearly_effort, :cmi_yearly_cost, :cmi_yearly_pal]}
+    user_preference = UserPreference.find_by_user_id(User.current.id)
+
+    options[params[:preference_type]].each do |option|
+      if params[:preference].present? and params[:preference].include?(option)
+        user_preference[option] = params[:preference][option]
+      else
+        user_preference[option] = '0'
+      end
+    end
+   
+    user_preference.save
+
+    if params[:preference_type] == 'metrics'
+      redirect_to :controller => 'metrics', :action => 'show'
+    else
+      redirect_to :controller => 'metrics', :action => 'yearly'
     end
   end
 
