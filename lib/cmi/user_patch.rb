@@ -36,7 +36,13 @@ module CMI
             end
           HistoryUserProfile.create(:user_id => self.id, :profile => self.role, :created_on => DateTime.now, :finished_on => nil)
         elsif !last_profile_status.present?
-          HistoryUserProfile.create(:user_id => self.id, :profile => self.role, :created_on => DateTime.now, :finished_on => nil)
+          if self.role.present?
+            role = self.role
+          else
+            role = " "
+          end
+          
+          HistoryUserProfile.create(:user_id => self.id, :profile => role, :created_on => DateTime.now, :finished_on => nil)
         end
       end
       
