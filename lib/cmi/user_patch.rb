@@ -47,11 +47,17 @@ module CMI
       end
       
       def role(date = Date.today)
+        Rails::logger.info "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ SOLICITA PERFIL CON FECHA: "+date.inspect
+        Rails::logger.info "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ LA FECHA ACTUAL ES: "+Date.today.inspect
         if date >= Date.today
+          Rails::logger.info "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ LA FECHA SOLICITAD ES >= QUE LA ACTUAL"
           role_field = UserCustomField.find_by_name(DEFAULT_VALUES['user_role_field'], :select => :id)
+          Rails::logger.info "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ EL PERFIL SELECCIONADO ES: "+custom_value_for(role_field.id).value.inspect rescue logger.info "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ HA FALLADO LA OBTENCIÓN DEL PERFIL"
           custom_value_for(role_field.id).value rescue nil
         else
+          Rails::logger.info "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ LA FECHA SOLICITADA ES < QUE LA ACTUAL"
           hup = HistoryUserProfile.find(:first, :conditions => ["user_id = ? AND DATE(created_on) <= ? AND (finished_on IS NULL OR finished_on >= ?)", self.id, date, date], :order => "created_on DESC", :select => :profile)
+          Rails::logger.info "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ EL PERFIL CORRESPONDIENTE PARA LA FECHA SOLICITADA ES: "+hup[:profile].inspect
           if hup.present?
             hup.profile
           else

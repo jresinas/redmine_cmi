@@ -20,8 +20,9 @@ module CMI
 
     module InstanceMethods
       def update_role_and_cost
+        Rails::logger.info "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ COMIENZA OBTENCIÓN DEL PERFIL DEL USUARIO: "+User.current.login
         self.role = self.user.role(self.spent_on)
-        
+        Rails::logger.info "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ PERFIL FINAL: "+self.role.inspect
         if self.role.present?
           @hash_cost_actual_year = (HistoryProfilesCost.find :all).group_by(&:year)[self.tyear].group_by(&:profile)
           if attribute_present?("hours") and self.role.present?
