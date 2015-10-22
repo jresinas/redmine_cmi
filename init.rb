@@ -16,6 +16,7 @@ require 'cmi/settings_controller_patch'
 require 'cmi/admin_controller_patch'
 require 'cmi/hooks_view_listener'
 require 'cmi/user_preference_patch'
+require 'cmi/access_control_patch'
 
 
 Redmine::Plugin.register :redmine_cmi do
