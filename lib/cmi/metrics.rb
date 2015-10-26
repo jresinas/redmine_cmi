@@ -616,8 +616,13 @@ module CMI
 
     # Métricas para vista anual
 
-    def effort_done_by_role_year(role)
-      year = date.year
+    def effort_done_by_role_year(role, rec_year = nil)
+      if rec_year != nil
+        year = rec_year
+      else
+        year = date.year
+      end
+
       project.effort_done_by_role_yearly(role, ("01/01/"+year.to_s).to_time, [Date.today, ("31/12/"+year.to_s).to_time].min)
     end
 
@@ -632,9 +637,11 @@ module CMI
       else
         year = date.year
       end
+
+      effort_done = effort_done_by_role_year(role, year)
       
       if year < [Date.today.year,project.finish_date.year].min
-        result = effort_done_by_role_year(role)
+        result = effort_done
       else
         if project.start_date.year < year
           total_scheduled_before = (project.start_date.year..year-1).inject(0.0){|sum, y| sum+effort_scheduled_by_role_year(role,y)}
@@ -643,11 +650,12 @@ module CMI
         end
         project_effort_left = (@project.cmi_checkpoints.last.scheduled_role_effort(role).to_f - total_scheduled_before)
 
-        if project_effort_left > effort_done_by_role_year(role)
+        if project_effort_left > effort_done
+          project_effort_left -= effort_done
           year_days_left = ([project.finish_date.to_date,("31/12/"+year.to_s).to_date].min - Date.today).to_f
           project_days_left = (project.finish_date.to_date - Date.today).to_f
 
-          result = (year_days_left*project_effort_left)/project_days_left
+          result = (year_days_left*project_effort_left)/project_days_left + effort_done
         else
           result = project_effort_left
         end
